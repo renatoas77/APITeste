@@ -1,4 +1,6 @@
-﻿namespace APITeste.Models
+﻿using System.Text.Json.Serialization;
+
+namespace APITeste.Models
 {
     public class Produto
     {

@@ -1,27 +1,70 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using APITeste.Context;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace APITeste.Controllers
 {
-    [Route("api/[controller]/{id}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class TesteController : ControllerBase
     {
-        [HttpGet(Name = "Teste")]
-        public String Get(int id)
+        private readonly AppDbContext _context;
+
+        public TesteController(AppDbContext context)
         {
-            if(id == 0)
+            _context = context;
+        }
+
+        [HttpPost(Name = "CreateCategoria")]
+        public ActionResult Post(Categoria categoria)
+        {
+            _context.Categorias.Add(categoria);
+            _context.SaveChanges();
+
+            return Created("Criado com sucesso!", categoria);
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult Get(int id)
+        {
+            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+
+            if(categoria != null)
             {
-                return "A id é igual a " + id;
+                return Ok(categoria);
             }
-            else if(id == 1)
+
+            return NotFound();
+        }
+
+        [HttpPut("{id:int}")]
+        public ActionResult Put(int id, Categoria categoria)
+        {
+            if(id != categoria.CategoriaId)
             {
-                return "A id é igual a " + id;
+                return BadRequest();
             }
-            else
+
+            _context.Entry(categoria).State = EntityState.Modified;
+            _context.SaveChanges();
+
+            return Ok("Atualizado com sucesso!");
+        }
+
+        [HttpDelete("{id:int}")]
+        public ActionResult Delete(int id)
+        {
+            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+
+            if(categoria is null)
             {
-                return $"A id escolhida '{id}' é maior que 1!";
+                return NotFound("Categoria não existe");
             }
+
+            _context.Categorias.Remove(categoria);
+            _context.SaveChanges();
+            return Ok("Categoria deleteda com sucesso!");
         }
     }
 }
